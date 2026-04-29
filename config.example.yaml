@@ -1,0 +1,41 @@
+# RAG Pipeline 配置文件
+# 复制为 config.yaml 后编辑
+
+paths:
+  data_dir: "data"                          # 知识文档目录
+  persist_dir: "/mnt/f/RAG_Project/chroma_db"  # ChromaDB 持久化路径
+  skills_dir: "skills"                      # 闭环学习 Skill 保存目录
+
+models:
+  embedding: "nomic-embed-text"             # 嵌入模型
+  chat: "gemma4:26b"                        # Chat 模型 (备选: qwen2.5:14b)
+  temperature: 0                            # 温度 (0=确定性, 1=创造性)
+
+retrieval:
+  k: 5                                      # 检索最相关的 k 个文档块
+  score_threshold: 0.0                      # 相似度阈值 (0=不过滤)
+  chunk_size: 800                           # 文本块大小 (字符数)
+  chunk_overlap: 100                        # 块间重叠 (字符数)
+
+chat:
+  max_history: 10                           # 最多保留的对话轮数
+  system_prompt: ""                         # 自定义系统提示 (留空使用默认)
+
+auto_ingest:
+  enabled: true                             # 是否启用自动文档监听
+  debounce_seconds: 3                       # 文件变化后防抖延迟
+  supported_extensions:                     # 支持自动监听的文件格式
+    - ".txt"
+    - ".pdf"
+    - ".md"
+    - ".docx"
+    - ".xlsx"
+
+skill_learning:
+  enabled: true                             # 是否启用闭环学习
+  min_rating: 4                             # 最低评分才保存为 Skill (1-5)
+  auto_save: false                          # 是否自动保存高质量问答
+
+ollama:
+  base_url: "http://localhost:11434"        # Ollama API 地址
+  timeout: 120                              # 请求超时 (秒)

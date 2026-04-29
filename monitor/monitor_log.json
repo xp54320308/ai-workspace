@@ -1,0 +1,34 @@
+[
+  {
+    "timestamp": "2026-04-22 10:07:42",
+    "checks": [
+      {
+        "check": "路径存在",
+        "status": "ok",
+        "message": "目录存在: /mnt/f/RAG_Project/chroma_db"
+      },
+      {
+        "check": "SQLite完整性",
+        "status": "ok",
+        "message": "完整性检查通过, 21张表, 2个集合"
+      },
+      {
+        "check": "向量索引文件",
+        "status": "warn",
+        "message": "3个子目录, 缺失2个文件: 14073bd0-cea3-47b3-9e65-b41b40933411/index_metadata.pickle, 77f2b2f3-3394-43ab-bd59-e370f4bf5562/index_metadata.pickle"
+      },
+      {
+        "check": "磁盘空间",
+        "status": "ok",
+        "message": "剩余 2785.2GB — 充足"
+      },
+      {
+        "check": "库大小",
+        "status": "ok",
+        "message": "82.5MB (0.08GB), 14个文件",
+        "size_mb": 82.5,
+        "growth": "首次检查，无历史数据"
+      }
+    ]
+  }
+]
