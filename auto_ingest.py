@@ -12,25 +12,26 @@ import os
 import sys
 import time
 import threading
-from pathlib import Path
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
+from config import load_config
 
 
 # ====================================================================
 #  配置
 # ====================================================================
-DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
-PERSIST_DIR = "/mnt/f/RAG_Project/chroma_db"
-EMBEDDING_MODEL = "nomic-embed-text"
-CHUNK_SIZE = 800
-CHUNK_OVERLAP = 100
+CONFIG = load_config()
+DATA_DIR = CONFIG["paths"]["data_dir"]
+PERSIST_DIR = CONFIG["paths"]["persist_dir"]
+EMBEDDING_MODEL = CONFIG["models"]["embedding"]
+CHUNK_SIZE = CONFIG["retrieval"]["chunk_size"]
+CHUNK_OVERLAP = CONFIG["retrieval"]["chunk_overlap"]
 
 # 防抖：文件变化后等待多少秒再重建（避免连续保存触发多次）
-DEBOUNCE_SECONDS = 3
+DEBOUNCE_SECONDS = CONFIG["auto_ingest"]["debounce_seconds"]
 
 # 支持的文件格式
-SUPPORTED_EXTENSIONS = {".txt", ".pdf", ".md", ".docx"}
+SUPPORTED_EXTENSIONS = {ext.lower() for ext in CONFIG["auto_ingest"]["supported_extensions"]}
 
 
 # ====================================================================

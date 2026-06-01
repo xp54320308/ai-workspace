@@ -13,12 +13,12 @@ from typing import Any, Dict
 DEFAULT_CONFIG = {
     "paths": {
         "data_dir": "data",
-        "persist_dir": "/mnt/f/RAG_Project/chroma_db",
+        "persist_dir": "chroma_db",
         "skills_dir": "skills",
     },
     "models": {
         "embedding": "nomic-embed-text",
-        "chat": "gemma4:26b",
+        "chat": "qwen2.5:14b",
         "temperature": 0,
     },
     "retrieval": {

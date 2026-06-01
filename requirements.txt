@@ -10,6 +10,7 @@ langchain-text-splitters>=0.3.0
 # 文档加载
 pypdf>=4.0.0
 python-docx>=1.0.0
+openpyxl>=3.1.0
 
 # 向量数据库
 chromadb>=0.5.0
@@ -20,9 +21,11 @@ ollama>=0.4.0
 # 配置管理
 pyyaml>=6.0
 
+# 自动文档监听
+watchdog>=3.0.0
+
 # === Tier 1：多格式增强（可选） ===
-# openpyxl>=3.1.0          # .xlsx 支持
-# watchdog>=3.0.0          # 自动文档监听
+# 以上默认安装 .xlsx 支持与自动文档监听，便于开箱运行。
 
 # === Tier 2：高级功能（可选） ===
 # paddlepaddle>=2.6.0      # PaddleOCR CPU 版

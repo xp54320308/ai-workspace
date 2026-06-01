@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Local configuration and secrets
+config.yaml
+.env
+.env.*
+!.env.example
+
+# Local knowledge and generated state
+data/
+skills/
+chroma_db/
+vectorstore/
+*.sqlite
+*.sqlite3
+
+# Logs and temporary files
+*.log
+tmp/
+temp/
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

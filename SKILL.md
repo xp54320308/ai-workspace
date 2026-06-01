@@ -13,8 +13,8 @@ description: |
 - **项目类型：** 本地 RAG 知识库系统
 - **技术栈：** Python + LangChain + ChromaDB + Ollama
 - **嵌入模型：** nomic-embed-text
-- **Chat 模型：** gemma4:26b
-- **向量库路径：** `/mnt/f/RAG_Project/chroma_db`
+- **Chat 模型：** qwen2.5:14b
+- **向量库路径：** `chroma_db`
 - **数据目录：** `data/` (项目根目录下)
 
 ## 安装
@@ -22,7 +22,7 @@ description: |
 ### Tier 0：零配置（5分钟启动）
 
 ```bash
-cd /mnt/c/Users/qw/Documents/RAG_Project
+cd ai-workspace
 source venv/bin/activate
 pip install -r requirements.txt
 
@@ -62,7 +62,8 @@ pip install watchdog>=3.0.0
 | `python run_rag.py test` | 运行管道测试 | 验证环境是否正常 |
 | `python run_rag.py status` | 查看知识库状态 | 检查当前数据量 |
 | `python run_rag.py auto` | 启动自动文档监听 | 持续运行场景 |
-| `python run_rag.py skill-save` | 保存高质量问答为 Skill | 闭环学习 |
+| `python run_rag.py skills` | 列出已保存的 Skills | 闭环学习 |
+| `python run_rag.py skill-stats` | 查看 Skill 统计信息 | 闭环学习 |
 
 ## 聊天机器人命令
 
@@ -139,9 +140,9 @@ python run_rag.py rebuild
 ### Q: 中文乱码
 确保所有 .txt 文件使用 UTF-8 编码。
 
-### Q: gemma4:26b 崩溃
-该模型在某些硬件上不稳定。备选方案：
+### Q: qwen2.5:14b 未安装或不适合当前硬件
+可以替换为任何本地 Ollama 已安装模型：
 ```bash
-ollama pull qwen2.5:14b
-# 然后编辑 config.yaml 中的 chat_model
+ollama list
+# 然后编辑 config.yaml 中的 models.chat
 ```

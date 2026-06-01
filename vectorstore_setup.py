@@ -76,23 +76,15 @@ def setup_vectorstore(
 
 
 if __name__ == "__main__":
-    # === 配置参数 ===
-    TARGET_PERSIST_PATH = "/mnt/f/RAG_Project/chroma_db"
-    DATA_SOURCE_DIR = "data"
-    EMBEDDING_MODEL = "nomic-embed-text"
+    from config import load_config
 
-    # 优化后的切片参数 (见第二步)
-    CHUNK_SIZE = 800
-    CHUNK_OVERLAP = 100
-
-    # 是否清空旧数据重建 (True = 全量重建)
-    CLEAR_OLD = True
+    config = load_config()
 
     setup_vectorstore(
-        data_dir=DATA_SOURCE_DIR,
-        persist_dir=TARGET_PERSIST_PATH,
-        embedding_model=EMBEDDING_MODEL,
-        chunk_size=CHUNK_SIZE,
-        chunk_overlap=CHUNK_OVERLAP,
-        clear_old=CLEAR_OLD,
+        data_dir=config["paths"]["data_dir"],
+        persist_dir=config["paths"]["persist_dir"],
+        embedding_model=config["models"]["embedding"],
+        chunk_size=config["retrieval"]["chunk_size"],
+        chunk_overlap=config["retrieval"]["chunk_overlap"],
+        clear_old=True,
     )

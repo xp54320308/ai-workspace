@@ -3,12 +3,12 @@
 
 paths:
   data_dir: "data"                          # 知识文档目录
-  persist_dir: "/mnt/f/RAG_Project/chroma_db"  # ChromaDB 持久化路径
+  persist_dir: "chroma_db"                  # ChromaDB 持久化路径
   skills_dir: "skills"                      # 闭环学习 Skill 保存目录
 
 models:
   embedding: "nomic-embed-text"             # 嵌入模型
-  chat: "gemma4:26b"                        # Chat 模型 (备选: qwen2.5:14b)
+  chat: "qwen2.5:14b"                       # Chat 模型 (可替换为本地 Ollama 已安装模型)
   temperature: 0                            # 温度 (0=确定性, 1=创造性)
 
 retrieval:
