@@ -1,0 +1,36 @@
+# 研究调研工作流
+# 触发词：搜索、调研、查一下、研究
+
+name: research
+description: 搜索 → 读取 → 提炼 → 存档
+
+steps:
+  - name: search
+    description: 搜索相关信息
+    tools:
+      - multi-search-engine
+    output: search_results
+
+  - name: read
+    description: 读取并提取关键内容
+    tools:
+      - windows-mcp__Scrape
+    input: search_results
+    output: extracted_content
+
+  - name: distill
+    description: 提炼要点
+    prompt: |
+      从以下内容中提炼出关键信息：
+      - 核心观点
+      - 重要细节
+      - 可行动项
+      
+      原始内容：
+      {extracted_content}
+    output: distilled_notes
+
+  - name: save
+    description: 保存到记忆库
+    path: "memory/learned/{date}-research.md"
+    input: distilled_notes

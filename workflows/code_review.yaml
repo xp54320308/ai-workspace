@@ -1,0 +1,35 @@
+# 代码审查工作流
+# 触发词：审查代码、code review、代码审查
+
+name: code_review
+description: 拉取代码 → 分析 → 审查 → 报告
+
+steps:
+  - name: fetch
+    description: 获取代码
+    tools:
+      - git-cli
+    output: code_content
+
+  - name: analyze
+    description: 分析代码问题
+    prompt: |
+      审查以下代码的问题：
+      - 潜在bug
+      - 性能问题
+      - 安全风险
+      - 代码风格
+      
+      代码：
+      {code_content}
+    output: issues
+
+  - name: report
+    description: 生成审查报告
+    format: markdown
+    output: review_report
+
+  - name: save
+    description: 保存报告
+    path: "memory/code-reviews/{date}-review.md"
+    input: review_report

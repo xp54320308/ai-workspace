@@ -1,0 +1,19 @@
+{
+  "_comment": "SD 1.5 文生图工作流 - 用于生成起始候选帧 (从 04-25 会话提取)",
+  "_source": "Codex session line 7929",
+  "_params": {
+    "resolution": "832x480",
+    "batch_size": 4,
+    "steps": 30,
+    "cfg": 8.0,
+    "sampler": "dpmpp_2m",
+    "scheduler": "karras"
+  },
+  "1": {"class_type": "CheckpointLoaderSimple", "inputs": {"ckpt_name": "anything-v5-PrtRE.safetensors"}},
+  "2": {"class_type": "CLIPTextEncode", "inputs": {"clip": ["1", 1], "text": "masterpiece, best quality, anime style, soft painting, cinematic 16:9 composition, one young girl in navy sailor school uniform seated beside a wooden window, strict side profile, looking out the window, girl placed on left third of frame, large wooden window on right, wutong tree leaves outside, dusk orange soft light, sheer white curtain hanging near the window, quiet wooden room, warm low saturation healing color grading, delicate line art, long black hair, gentle amber brown eyes, calm expression, shallow depth of field, no text, no watermark, not front facing"}},
+  "3": {"class_type": "CLIPTextEncode", "inputs": {"clip": ["1", 1], "text": "front view, centered portrait, looking at viewer, close-up face, dark room, lowres, bad anatomy, bad hands, text, watermark, worst quality, low quality, blurry, ugly, deformed, extra fingers, duplicate person, cropped"}},
+  "4": {"class_type": "EmptyLatentImage", "inputs": {"width": 832, "height": 480, "batch_size": 4}},
+  "5": {"class_type": "KSampler", "inputs": {"model": ["1", 0], "positive": ["2", 0], "negative": ["3", 0], "latent_image": ["4", 0], "seed": 20260430631, "steps": 30, "cfg": 8.0, "sampler_name": "dpmpp_2m", "scheduler": "karras", "denoise": 1.0}},
+  "6": {"class_type": "VAEDecode", "inputs": {"samples": ["5", 0], "vae": ["1", 2]}},
+  "7": {"class_type": "SaveImage", "inputs": {"images": ["6", 0], "filename_prefix": "manga30s_v62_start_candidates/start_candidate"}}
+}

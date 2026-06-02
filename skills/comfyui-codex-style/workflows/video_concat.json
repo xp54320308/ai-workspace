@@ -1,0 +1,16 @@
+{
+  "_comment": "视频拼接工作流 - 两段视频合并 (从 04-25 会话提取)",
+  "_source": "Codex session line 530",
+  "_params": {
+    "fps": 14.8,
+    "format": "mp4",
+    "codec": "h264"
+  },
+  "1": {"class_type": "LoadVideo", "inputs": {"file": "shot1.mp4"}},
+  "2": {"class_type": "GetVideoComponents", "inputs": {"video": ["1", 0]}},
+  "3": {"class_type": "LoadVideo", "inputs": {"file": "shot2.mp4"}},
+  "4": {"class_type": "GetVideoComponents", "inputs": {"video": ["3", 0]}},
+  "5": {"class_type": "ImageBatch", "inputs": {"image1": ["2", 0], "image2": ["4", 0]}},
+  "6": {"class_type": "CreateVideo", "inputs": {"images": ["5", 0], "fps": 14.8}},
+  "7": {"class_type": "SaveVideo", "inputs": {"video": ["6", 0], "filename_prefix": "final_concat", "format": "mp4", "codec": "h264"}}
+}

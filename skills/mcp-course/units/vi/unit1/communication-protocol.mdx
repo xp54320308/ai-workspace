@@ -1,0 +1,214 @@
+# Giao Thức Truyền Thông
+
+MCP định nghĩa một giao thức truyền thông chuẩn hóa cho phép Client và Server trao đổi thông điệp một cách nhất quán, dễ dự đoán. Sự chuẩn hóa này rất quan trọng để đảm bảo khả năng tương tác trong cộng đồng. Trong phần này, chúng ta sẽ khám phá cấu trúc giao thức và cơ chế vận chuyển được sử dụng trong MCP.
+
+> [!WARNING]
+> Chúng ta đang đi sâu vào những chi tiết phức tạp của giao thức MCP (nguyên văn: "nitty-gritty" - chỉ những chi tiết quan trọng và phức tạp). Bạn không cần biết tất cả những điều này để xây dựng với MCP, nhưng nên biết về sự tồn tại và cách hoạt động của nó.
+
+## JSON-RPC: Nền Tảng
+
+Cốt lõi của MCP sử dụng **JSON-RPC 2.0** làm định dạng thông điệp cho mọi giao tiếp giữa Client và Server. JSON-RPC là giao thức gọi thủ tục từ xa nhẹ được mã hóa bằng JSON, mang lại các ưu điểm:
+
+- Dễ đọc và dễ gỡ lỗi
+- Không phụ thuộc ngôn ngữ, hỗ trợ triển khai trên mọi môi trường lập trình
+- Được thiết lập tốt với đặc tả rõ ràng và được áp dụng rộng rãi
+
+![message types](https://huggingface.co/datasets/mcp-course/images/resolve/main/unit1/5.png)
+
+Giao thức định nghĩa ba loại thông điệp:
+
+### 1. Yêu Cầu (Requests)
+
+Được gửi từ Client đến Server để khởi tạo một thao tác. Thông điệp Yêu cầu bao gồm:
+- Định danh duy nhất (`id`)
+- Tên phương thức cần gọi (ví dụ: `tools/call`)
+- Tham số cho phương thức (nếu có)
+
+Ví dụ Yêu cầu:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "tools/call",
+  "params": {
+    "name": "weather",
+    "arguments": {
+      "location": "San Francisco"
+    }
+  }
+}
+```
+
+### 2. Phản Hồi (Responses)
+
+Được gửi từ Server đến Client để trả lời Yêu cầu. Thông điệp Phản hồi bao gồm:
+- `id` giống với Yêu cầu tương ứng
+- Hoặc `result` (thành công) hoặc `error` (thất bại)
+
+Ví dụ Phản hồi Thành công:
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "temperature": 62,
+    "conditions": "Partly cloudy"
+  }
+}
+```
+
+Ví dụ Phản hồi Lỗi:
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "error": {
+    "code": -32602,
+    "message": "Invalid location parameter"
+  }
+}
+```
+
+### 3. Thông Báo
+
+Thông điệp một chiều không yêu cầu phản hồi. Thường được gửi từ Server đến Client để cập nhật tiến trình hoặc thông báo sự kiện.
+
+Ví dụ Thông Báo:
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "progress",
+  "params": {
+    "message": "Processing data...",
+    "percent": 50
+  }
+}
+```
+
+## Cơ Chế Vận Chuyển
+
+JSON-RPC định nghĩa định dạng thông điệp, nhưng MCP cũng chỉ định cách thức các thông điệp này được truyền tải giữa Server đến Client. Hai cơ chế vận chuyển chính được hỗ trợ:
+
+### stdio (Đầu vào/Đầu ra chuẩn)
+
+Cơ chế stdio được dùng cho giao tiếp cục bộ, khi Client và Server chạy trên cùng máy:
+
+Ứng dụng chủ khởi chạy Server như một tiến trình con và giao tiếp bằng cách ghi vào đầu vào chuẩn (stdin) và đọc từ đầu ra chuẩn (stdout).
+
+> [!TIP]
+> **Trường hợp sử dụng** cho phương thức truyền tải này là các công cụ local như truy cập hệ thống file hoặc chạy script local.
+
+**Ưu điểm** chính của phương thức này là đơn giản, không yêu cầu cấu hình mạng và được hệ điều hành cách ly an toàn.
+
+### HTTP + SSE (Server-Sent Events) / HTTP có thể streaming
+
+Phương thức HTTP + SSE được dùng cho giao tiếp từ xa khi Client và Server có thể ở các máy khác nhau:
+
+Giao tiếp diễn ra qua HTTP, với Server sử dụng Server-Sent Events (SSE) để đẩy các cập nhật tới Client qua kết nối liên tục.
+
+> [!TIP]
+> **Trường hợp sử dụng** cho phương thức này là kết nối tới API từ xa, dịch vụ đám mây hoặc tài nguyên dùng chung.
+
+**Ưu điểm** chính là hoạt động được qua mạng, tích hợp được với dịch vụ web và tương thích với môi trường serverless.
+
+Các bản cập nhật gần đây của chuẩn MCP đã giới thiệu hoặc cải tiến "Streamable HTTP", mang lại tính linh hoạt cao hơn bằng cách cho phép Server nâng cấp động lên SSE để streaming khi cần, đồng thời vẫn giữ được tính tương thích với môi trường serverless.
+
+## Vòng đời tương tác
+
+Ở phần trước, chúng ta đã thảo luận về vòng đời của một lượt tương tác đơn lẻ giữa Client (💻) và Server (🌐). Giờ hãy xem xét vòng đời của một lượt tương tác hoàn chỉnh trong ngữ cảnh giao thức MCP.
+
+Giao thức MCP định nghĩa vòng đời tương tác có cấu trúc giữa Client và Server:
+
+### Khởi tạo
+
+Client kết nối tới Server và hai bên trao đổi phiên bản giao thức cùng các tính năng hỗ trợ, Server phản hồi với phiên bản giao thức và tính năng mà nó hỗ trợ.
+
+<table style="width: 100%;">
+  <tr>
+    <td style="background-color: lightgreen; text-align: center; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">💻</td>
+    <td style="text-align: center;">→<br>initialize</td>
+    <td style="background-color: lightblue; text-align: center; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">🌐</td>
+  </tr>
+  <tr>
+    <td style="background-color: lightgreen; text-align: center; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">💻</td>
+    <td style="text-align: center;">←<br>response</td>
+    <td style="background-color: lightblue; text-align: center; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">🌐</td>
+  </tr>
+  <tr>
+    <td style="background-color: lightgreen; text-align: center; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">💻</td>
+    <td style="text-align: center;">→<br>initialized</td>
+    <td style="background-color: lightblue; text-align: center; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">🌐</td>
+  </tr>
+</table>
+
+Client xác nhận hoàn tất khởi tạo qua thông báo.
+
+### Khám phá
+
+Client yêu cầu thông tin về các tính năng khả dụng và Server phản hồi với danh sách công cụ có sẵn.
+
+<table style="width: 100%;">
+  <tr>
+    <td style="background-color: lightgreen; text-align: center; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">💻</td>
+    <td style="text-align: center;">→<br>tools/list</td>
+    <td style="background-color: lightblue; text-align: center; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">🌐</td>
+  </tr>
+  <tr>
+    <td style="background-color: lightgreen; text-align: center; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">💻</td>
+    <td style="text-align: center;">←<br>response</td>
+    <td style="background-color: lightblue; text-align: center; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">🌐</td>
+  </tr>
+</table>
+
+Quá trình này có thể được lặp lại cho từng công cụ, tài nguyên hoặc loại prompt.
+
+### Thực thi
+
+Client kích hoạt các khả năng dựa trên nhu cầu của Host.
+
+<table style="width: 100%;">
+  <tr>
+    <td style="background-color: lightgreen; text-align: center; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">💻</td>
+    <td style="text-align: center;">→<br>tools/call</td>
+    <td style="background-color: lightblue; text-align: center; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">🌐</td>
+  </tr>
+  <tr>
+    <td style="background-color: lightgreen; text-align: center; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">💻</td>
+    <td style="text-align: center;">←<br>thông báo (tiến trình tùy chọn)</td>
+    <td style="background-color: lightblue; text-align: center; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">🌐</td>
+  </tr>
+  <tr>
+    <td style="background-color: lightgreen; text-align: center; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">💻</td>
+    <td style="text-align: center;">←<br>phản hồi</td>
+    <td style="background-color: lightblue; text-align: center; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">🌐</td>
+  </tr>
+</table>
+
+### Kết thúc
+
+Kết nối được đóng một cách hợp lệ khi không còn cần thiết và Server xác nhận yêu cầu tắt.
+
+<table style="width: 100%;">
+  <tr>
+    <td style="background-color: lightgreen; text-align: center; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">💻</td>
+    <td style="text-align: center;">→<br>tắt máy</td>
+    <td style="background-color: lightblue; text-align: center; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">🌐</td>
+  </tr>
+  <tr>
+    <td style="background-color: lightgreen; text-align: center; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">💻</td>
+    <td style="text-align: center;">←<br>phản hồi</td>
+    <td style="background-color: lightblue; text-align: center; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">🌐</td>
+  </tr>
+  <tr>
+    <td style="background-color: lightgreen; text-align: center; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">💻</td>
+    <td style="text-align: center;">→<br>thoát</td>
+    <td style="background-color: lightblue; text-align: center; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">🌐</td>
+  </tr>
+</table>
+
+Client gửi thông điệp thoát cuối cùng để hoàn tất việc kết thúc.
+
+## Tiến hóa của Giao thức
+
+Giao thức MCP được thiết kế để có thể mở rộng và thích ứng. Giai đoạn khởi tạo bao gồm thương lượng phiên bản, cho phép tương thích ngược khi giao thức phát triển. Bên cạnh đó, việc khám phá khả năng cho phép Client thích ứng với các tính năng cụ thể mà mỗi Server cung cấp, cho phép kết hợp cả Máy chủ cơ bản và nâng cao trong cùng một hệ sinh thái.

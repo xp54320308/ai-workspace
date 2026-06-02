@@ -1,0 +1,177 @@
+# Gradio as an MCP Client
+
+In the previous section, we explored how to create an MCP Server using Gradio and connect to it using an MCP Client. In this section, we're going to explore how to use Gradio as an MCP Client to connect to an MCP Server.
+
+> [!TIP]
+> Gradio is best suited to the creation of UI clients and MCP servers, but it is also possible to use it as an MCP Client and expose that as a UI.
+
+We'll connect to an MCP server similar to the one we created in the previous section but with additional features, and use it to answer questions.
+
+## MCP Client in Gradio
+
+### Connect to an example MCP Server
+
+Let's connect to an example MCP Server that is already running on Hugging Face. We'll use [this one](https://huggingface.co/spaces/abidlabs/mcp-tool-http) for this example. It's a space that contains a collection of MCP tools.
+
+```python
+from smolagents.mcp_client import MCPClient
+
+with MCPClient(
+    {"url": "https://abidlabs-mcp-tool-http.hf.space/gradio_api/mcp/sse", "transport": "sse",}
+) as tools:
+    # Tools from the remote server are available
+    print("\n".join(f"{t.name}: {t.description}" for t in tools))
+
+```
+
+<details>
+<summary>Output</summary>
+<pre>
+<code>
+prime_factors: Compute the prime factorization of a positive integer.
+generate_cheetah_image: Generate a cheetah image.
+image_orientation: Returns whether image is portrait or landscape.
+sepia: Apply a sepia filter to the input image.
+</code>
+</pre>
+</details>
+
+### Connect to the MCP Server from Gradio
+
+Great, now that you've connected to an example MCP Server. Now, you need to use it in an example application.
+
+First, we need to install the `smolagents`, Gradio and mcp-client libraries, if we haven't already:
+
+```bash
+pip install "smolagents[mcp]" "gradio[mcp]" mcp fastmcp
+```
+
+Now, we can import the necessary libraries and create a simple Gradio interface that uses the MCP Client to connect to the MCP Server.
+
+
+```python
+import gradio as gr
+import os
+
+from mcp import StdioServerParameters
+from smolagents import InferenceClientModel, CodeAgent, ToolCollection, MCPClient
+```
+
+Next, we'll connect to the MCP Server and get the tools that we can use to answer questions.
+
+```python
+mcp_client = MCPClient(
+    {"url": "https://abidlabs-mcp-tool-http.hf.space/gradio_api/mcp/sse", "transport": "sse",} # This is the MCP Client we created in the previous section
+)
+tools = mcp_client.get_tools()
+```
+
+Now that we have the tools, we can create a simple agent that uses them to answer questions. We'll just use a simple `InferenceClientModel` and the default model from `smolagents` for now.
+
+It is important to pass your api_key to the InferenceClientModel. You can access the token from your huggingface account. [check here.](https://huggingface.co/docs/hub/en/security-tokens), and set the access token with the environment variable  `HF_TOKEN`.
+
+```python
+model = InferenceClientModel(token=os.getenv("HF_TOKEN"))
+agent = CodeAgent(tools=[*tools], model=model)
+```
+
+Now, we can create a simple Gradio interface that uses the agent to answer questions.
+
+```python
+demo = gr.ChatInterface(
+    fn=lambda message, history: str(agent.run(message)),
+    type="messages",
+    examples=["Prime factorization of 68"],
+    title="Agent with MCP Tools",
+    description="This is a simple agent that uses MCP tools to answer questions."
+)
+
+demo.launch()
+```
+
+And that's it! We've created a simple Gradio interface that uses the MCP Client to connect to the MCP Server and answer questions.
+
+<iframe
+	src="https://mcp-course-unit2-gradio-client.hf.space"
+	frameborder="0"
+	width="850"
+	height="450"
+></iframe>
+
+
+## Complete Example
+
+Here's the complete example of the usage of an MCP Client in Gradio:
+
+```python
+import gradio as gr
+import os
+
+from smolagents import InferenceClientModel, CodeAgent, MCPClient
+
+
+try:
+    mcp_client = MCPClient(
+        {"url": "https://abidlabs-mcp-tool-http.hf.space/gradio_api/mcp/sse", "transport": "sse",}
+    )
+    tools = mcp_client.get_tools()
+
+    model = InferenceClientModel(token=os.getenv("HUGGINGFACE_API_TOKEN"))
+    agent = CodeAgent(tools=[*tools], model=model, additional_authorized_imports=["json", "ast", "urllib", "base64"])
+
+    demo = gr.ChatInterface(
+        fn=lambda message, history: str(agent.run(message)),
+        type="messages",
+        examples=["Analyze the sentiment of the following text 'This is awesome'"],
+        title="Agent with MCP Tools",
+        description="This is a simple agent that uses MCP tools to answer questions.",
+    )
+
+    demo.launch()
+finally:
+    mcp_client.disconnect()
+```
+
+You'll notice that we're closing the MCP Client in the `finally` block. This is important because the MCP Client is a long-lived object that needs to be closed when the program exits.
+
+## Deploying to Hugging Face Spaces
+
+To make your server available to others, you can deploy it to Hugging Face Spaces, just like we did in the previous section.
+To deploy your Gradio MCP client to Hugging Face Spaces:
+
+1. Create a new Space on Hugging Face:
+   - Go to huggingface.co/spaces
+   - Click "Create new Space"
+   - Choose "Gradio" as the SDK
+   - Name your space (e.g., "mcp-client")
+
+2. Update MCP Server URL in the code:
+
+```python
+mcp_client = MCPClient(
+    {"url": "https://abidlabs-mcp-tool-http.hf.space/gradio_api/mcp/sse", "transport": "sse"}
+)
+```
+
+3. Create a `requirements.txt` file:
+```txt
+gradio[mcp]
+smolagents[mcp]
+```
+
+4. Push your code to the Space:
+```bash
+git init
+git add app.py requirements.txt
+git commit -m "Initial commit"
+git remote add origin https://huggingface.co/spaces/YOUR_USERNAME/mcp-client
+git push -u origin main
+```
+
+Note: While adding remote origin, Refer to [password-git-deprecation](https://huggingface.co/blog/password-git-deprecation) for adding with AccessToken.
+
+## Conclusion
+
+In this section, we've explored how to use Gradio as an MCP Client to connect to an MCP Server. We've also seen how to deploy the MCP Client in Hugging Face Spaces.
+
+

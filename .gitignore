@@ -1,0 +1,32 @@
+# 隐私和敏感信息
+memory/
+MEMORY.md
+USER.md
+TOOLS.md
+*.log
+*.env
+.env*
+config.json
+openclaw.json
+.git-credentials
+
+# 临时文件
+tmp/
+temp-*/
+*.tmp
+*.temp
+
+# 依赖
+node_modules/
+__pycache__/
+*.pyc
+
+# 系统文件
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 日志和缓存
+*.log.*
+cache/
+.cache/

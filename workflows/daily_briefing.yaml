@@ -1,0 +1,44 @@
+# 每日简报工作流
+# 触发词：简报、daily briefing、今日摘要
+
+name: daily_briefing
+description: 天气 → 日程 → 邮件 → 要点汇总
+
+steps:
+  - name: weather
+    description: 获取天气
+    tools:
+      - weather
+    output: weather_info
+
+  - name: calendar
+    description: 检查日程
+    prompt: 检查今日和明日的日程安排
+    output: calendar_info
+
+  - name: email
+    description: 检查邮件
+    prompt: 检查未读邮件，标记重要项
+    output: email_summary
+
+  - name: summarize
+    description: 汇总简报
+    prompt: |
+      汇总以下信息生成简报：
+      
+      天气：{weather_info}
+      日程：{calendar_info}
+      邮件：{email_summary}
+      
+      格式：
+      ## 今日简报 {date}
+      
+      ### 天气
+      ### 日程  
+      ### 邮件
+      ### 建议
+    output: briefing
+
+  - name: deliver
+    description: 输出简报
+    channel: feishu

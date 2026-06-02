@@ -1,0 +1,34 @@
+{
+  "_comment": "Qwen Image Edit 关键帧工作流 - 4格统一分镜 (从 04-25 wf_keyframes_source.json 提取)",
+  "_source": "wf_keyframes_source.json",
+  "_params": {
+    "resolution": "832x480",
+    "steps": 4,
+    "cfg": 2.0,
+    "sampler": "euler",
+    "scheduler": "simple",
+    "lora_strength": {"multi_angle": 0.8, "lightning_4step": 1.0}
+  },
+  "models": {
+    "unet": "qwen_image_edit_2509_fp8_e4m3fn.safetensors",
+    "clip": "qwen_2.5_vl_7b_fp8_scaled.safetensors",
+    "vae": "qwen_image_vae.safetensors",
+    "lora_multi_angle": "Qwen-Edit-2509-Multiple-angles.safetensors",
+    "lora_lightning": "Qwen-Image-Edit-2509-Lightning-4steps-V1.0-bf16.safetensors"
+  },
+  "node_chain": [
+    "UNETLoader → LoraLoaderModelOnly(multi_angle) → LoraLoaderModelOnly(lightning)",
+    "CLIPLoader → CLIPTextEncode(角色设定) + TextEncodeQwenImageEditPlus(分镜1-4)",
+    "VAELoader",
+    "LoadImage(角色参考图)",
+    "KSampler × 4 (每分镜独立采样)",
+    "VAEDecode × 4",
+    "SaveImage × 4"
+  ],
+  "shots": [
+    {"id": "shot1", "prompt": "Keep the same girl, same train, same sunset. Shot 1: medium close-up, she is looking down at the folded letter in her hands, calm breathing, restrained expression, no large pose change, manga drama still."},
+    {"id": "shot2", "prompt": "Shot 2: same girl, same seat. Her fingers gently touch the letter edge, eyes still down, subtle emotional tension building."},
+    {"id": "shot3", "prompt": "Shot 3: she slowly raises her head from the letter, eyes lift toward the sunset outside the window, warm light on her face."},
+    {"id": "shot4", "prompt": "Shot 4: wide shot, same girl by the window looking at sunset, letter in hand, curtain floating, full train carriage composition."}
+  ]
+}

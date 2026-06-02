@@ -1,0 +1,23 @@
+{
+  "_comment": "Wan 2.2 Fun Camera I2V 工作流 (从 04-25 会话提取)",
+  "_source": "Codex session line 4731",
+  "_params": {
+    "resolution": "512x288",
+    "frames": 41,
+    "steps": 4,
+    "cfg": 1.0,
+    "sampler": "dpm++_sde",
+    "shift": 5.0,
+    "camera": "Zoom Out + Tilt Left"
+  },
+  "1": {"class_type": "LoadImage", "inputs": {"image": "manga5s_v45_20260426_214125_read.png"}},
+  "2": {"class_type": "WanVideoVAELoader", "inputs": {"model_name": "wan2.2_vae.safetensors", "precision": "bf16", "use_cpu_cache": false, "verbose": false}},
+  "3": {"class_type": "WanVideoTextEncodeCached", "inputs": {"model_name": "umt5_xxl_fp8_e4m3fn_scaled.safetensors", "precision": "bf16", "positive_prompt": "anime girl sitting by the train window, soft breathing, slight head turn, hair fluttering, outside sky moving with clouds, natural cinematic motion, stable manga style", "negative_prompt": "worst quality, low quality, jpeg artifacts, static, frozen frame, extra fingers, malformed hands, deformed face, broken anatomy, subtitles, text, watermark, gray haze", "quantization": "disabled", "use_disk_cache": true, "device": "gpu"}},
+  "4": {"class_type": "ADE_CameraPoseCombo", "inputs": {"motion_type1": "Zoom Out", "strength1": 0.18, "motion_type2": "Tilt Left", "strength2": 0.10, "motion_type3": "Static", "strength3": 0.0, "motion_type4": "Static", "strength4": 0.0, "motion_type5": "Static", "strength5": 0.0, "motion_type6": "Static", "strength6": 0.0, "speed": 0.20, "frame_length": 41}},
+  "5": {"class_type": "WanVideoFunCameraEmbeds", "inputs": {"poses": ["4", 0], "width": 512, "height": 288, "strength": 0.9, "start_percent": 0.0, "end_percent": 1.0}},
+  "6": {"class_type": "WanVideoImageToVideoEncode", "inputs": {"width": 512, "height": 288, "num_frames": 41, "noise_aug_strength": 0.02, "start_latent_strength": 1.0, "end_latent_strength": 1.0, "force_offload": true, "vae": ["2", 0], "start_image": ["1", 0], "control_embeds": ["5", 0], "fun_or_fl2v_model": true, "tiled_vae": false, "augment_empty_frames": 0.0}},
+  "7": {"class_type": "WanVideoModelLoader", "inputs": {"model": "wan2.2_fun_camera_low_noise_14B_fp8_scaled.safetensors", "base_precision": "fp16_fast", "quantization": "fp8_e4m3fn_scaled", "load_device": "offload_device", "attention_mode": "comfy", "rms_norm_function": "default"}},
+  "8": {"class_type": "WanVideoSampler", "inputs": {"model": ["7", 0], "image_embeds": ["6", 0], "steps": 4, "cfg": 1.0, "shift": 5.0, "seed": 424242, "force_offload": true, "scheduler": "dpm++_sde", "riflex_freq_index": 0, "text_embeds": ["3", 0], "rope_function": "comfy", "start_step": 0, "end_step": -1, "add_noise_to_samples": false}},
+  "9": {"class_type": "WanVideoDecode", "inputs": {"vae": ["2", 0], "samples": ["8", 0], "enable_vae_tiling": false, "tile_x": 272, "tile_y": 272, "tile_stride_x": 144, "tile_stride_y": 128, "normalization": "default"}},
+  "10": {"class_type": "VHS_VideoCombine", "inputs": {"images": ["9", 0], "frame_rate": 16, "loop_count": 0, "filename_prefix": "manga5s_v48_fun_camera_wrapper_smoketest", "format": "video/h264-mp4", "pingpong": false, "save_output": true, "pix_fmt": "yuv420p", "crf": 19, "save_metadata": true, "trim_to_audio": false}}
+}

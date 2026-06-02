@@ -1,0 +1,25 @@
+{
+  "_comment": "RIFE 帧插值工作流 - 2倍插值到 32fps (从 AKI 工作流提取)",
+  "_source": "AKI_漫剧正式链路_RIFE_2x_32fps.json",
+  "_params": {
+    "input_fps": 16,
+    "output_fps": 32,
+    "rife_model": "rife49.pth",
+    "multiplier": 2,
+    "format": "mp4",
+    "codec": "h264",
+    "crf": 18
+  },
+  "nodes": [
+    {"id": 1, "type": "LoadVideo", "title": "Load Video", "widgets_values": ["input_video.mp4", "image"]},
+    {"id": 2, "type": "GetVideoComponents", "title": "Get Video Components"},
+    {"id": 3, "type": "RIFE VFI", "title": "RIFE VFI", "widgets_values": ["rife49.pth", 8, 2, true, true, 1.0, "float16", false, 1]},
+    {"id": 4, "type": "VHS_VideoCombine", "title": "RIFE 2x 32fps Output", "widgets_values": {"frame_rate": 32, "loop_count": 0, "filename_prefix": "aki_tests/rife32", "format": "video/h264-mp4", "pix_fmt": "yuv420p", "crf": 18, "save_metadata": true, "trim_to_audio": false, "pingpong": false, "save_output": true}}
+  ],
+  "links": [
+    [1, 1, 0, 2, 0, "VIDEO"],
+    [2, 2, 0, 3, 0, "IMAGE"],
+    [3, 2, 1, 4, 1, "AUDIO"],
+    [4, 3, 0, 4, 0, "IMAGE"]
+  ]
+}

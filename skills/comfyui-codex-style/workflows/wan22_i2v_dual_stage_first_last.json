@@ -1,0 +1,30 @@
+{
+  "_comment": "Wan 2.2 I2V 首尾帧双阶段采样工作流 (从 04-25 会话提取)",
+  "_source": "AKI_first_last_I2V_big_action_v57_API.json + Codex session",
+  "_params": {
+    "resolution": "832x480",
+    "frames": 81,
+    "steps": 22,
+    "cfg": 4.0,
+    "sampler": "euler",
+    "scheduler": "simple",
+    "shift": 8.0,
+    "dual_stage": "high_noise(0-11) + low_noise(11-22)"
+  },
+  "1": {"class_type": "UNETLoader", "inputs": {"unet_name": "wan2.2_i2v_high_noise_14B_fp8_scaled.safetensors", "weight_dtype": "default"}},
+  "2": {"class_type": "UNETLoader", "inputs": {"unet_name": "wan2.2_i2v_low_noise_14B_fp8_scaled.safetensors", "weight_dtype": "default"}},
+  "3": {"class_type": "CLIPLoader", "inputs": {"clip_name": "umt5_xxl_fp8_e4m3fn_scaled.safetensors", "type": "wan", "device": "default"}},
+  "4": {"class_type": "VAELoader", "inputs": {"vae_name": "wan_2.1_vae.safetensors"}},
+  "5": {"class_type": "ModelSamplingSD3", "inputs": {"model": ["1", 0], "shift": 8.0}},
+  "6": {"class_type": "ModelSamplingSD3", "inputs": {"model": ["2", 0], "shift": 8.0}},
+  "7": {"class_type": "CLIPTextEncode", "inputs": {"clip": ["3", 0], "text": "anime manga drama, same young girl in navy school uniform inside a sunset train carriage, a strong train brake throws her forward, she quickly raises one hand toward her hair and collar to steady herself, upper body leans forward, hair whips with inertia, sleeve and ribbon flutter, eyes react sharply, the carriage sways left and right, window reflections streak, outside scenery rushes past with obvious parallax, clouds slide fast, sunlight flickers across seats and walls, energetic but smooth motion, stable identity, stable face, single continuous 5 second shot, no scene cut"}},
+  "8": {"class_type": "CLIPTextEncode", "inputs": {"clip": ["3", 0], "text": "still image, frozen background, weak motion, motionless clouds, static window view, no parallax, identity change, different girl, different uniform, face drift, deformed face, deformed hands, extra fingers, broken wrist, bad anatomy, blurry face, low quality, over-smoothed, watermark, subtitles, hard scene cut, red vertical stripes, abstract texture, empty train, duplicate person"}},
+  "9": {"class_type": "LoadImage", "inputs": {"image": "manga5s_v57_first_last_i2v_dynamic_20260430_002310_i2v_big_body_react_start.png"}},
+  "10": {"class_type": "LoadImage", "inputs": {"image": "manga5s_v57_first_last_i2v_dynamic_20260430_002310_i2v_big_body_react_end.png"}},
+  "11": {"class_type": "WanFirstLastFrameToVideo", "inputs": {"positive": ["7", 0], "negative": ["8", 0], "vae": ["4", 0], "start_image": ["9", 0], "end_image": ["10", 0], "width": 832, "height": 480, "length": 81, "batch_size": 1}},
+  "12": {"class_type": "KSamplerAdvanced", "inputs": {"model": ["5", 0], "positive": ["11", 0], "negative": ["11", 1], "latent_image": ["11", 2], "add_noise": "enable", "noise_seed": 20260430572, "steps": 22, "cfg": 4.0, "sampler_name": "euler", "scheduler": "simple", "start_at_step": 0, "end_at_step": 11, "return_with_leftover_noise": "enable"}},
+  "13": {"class_type": "KSamplerAdvanced", "inputs": {"model": ["6", 0], "positive": ["11", 0], "negative": ["11", 1], "latent_image": ["12", 0], "add_noise": "disable", "noise_seed": 0, "steps": 22, "cfg": 4.0, "sampler_name": "euler", "scheduler": "simple", "start_at_step": 11, "end_at_step": 10000, "return_with_leftover_noise": "disable"}},
+  "14": {"class_type": "VAEDecode", "inputs": {"samples": ["13", 0], "vae": ["4", 0]}},
+  "15": {"class_type": "CreateVideo", "inputs": {"images": ["14", 0], "fps": 16.0}},
+  "16": {"class_type": "SaveVideo", "inputs": {"video": ["15", 0], "filename_prefix": "manga5s_v57_first_last_i2v_dynamic/i2v_big_body_react", "format": "mp4", "codec": "h264"}}
+}
