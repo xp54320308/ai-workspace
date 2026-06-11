@@ -1,0 +1,76 @@
+
+# ChromaDB 使用指南
+
+## 简介
+
+ChromaDB 是一个开源的向量数据库，专为 AI 应用设计。它简单易用，
+支持本地部署，非常适合 RAG（检索增强生成）项目。
+
+## 核心概念
+
+### 向量 (Vector)
+向量是文本的数值表示，由嵌入模型生成。相似的文本具有相似的向量。
+
+### 集合 (Collection)
+集合是 ChromaDB 中存储数据的基本单位，类似于关系数据库中的表。
+
+### 持久化 (Persistence)
+ChromaDB 支持将数据持久化到磁盘，重启后数据不会丢失。
+
+## 基本操作
+
+### 1. 创建客户端
+```python
+import chromadb
+client = chromadb.PersistentClient(path="./chroma_db")
+```
+
+### 2. 创建集合
+```python
+collection = client.create_collection(name="my_collection")
+```
+
+### 3. 添加数据
+```python
+collection.add(
+    documents=["这是第一个文档", "这是第二个文档"],
+    ids=["id1", "id2"],
+    metadatas=[{"source": "file1.txt"}, {"source": "file2.txt"}]
+)
+```
+
+### 4. 查询数据
+```python
+results = collection.query(
+    query_texts=["相关的问题"],
+    n_results=3
+)
+```
+
+## 与 LangChain 集成
+
+ChromaDB 与 LangChain 无缝集成：
+
+```python
+from langchain_chroma import Chroma
+from langchain_ollama import OllamaEmbeddings
+
+embeddings = OllamaEmbeddings(model="nomic-embed-text")
+vectorstore = Chroma(
+    persist_directory="./chroma_db",
+    embedding_function=embeddings
+)
+
+# 添加文档
+vectorstore.add_documents(chunks)
+
+# 检索
+docs = vectorstore.similarity_search("查询内容", k=3)
+```
+
+## 性能优化建议
+
+1. **合理设置 chunk_size**：太小丢失上下文，太大降低检索精度
+2. **使用 chunk_overlap**：避免切片边界丢失信息
+3. **选择合适的嵌入模型**：nomic-embed-text 适合英文，BGE 适合中文
+4. **定期清理无效数据**：删除不再使用的集合

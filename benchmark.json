@@ -1,0 +1,56 @@
+{
+  "version": "1.0",
+  "description": "RAG 项目基准测试数据集",
+  "test_cases": [
+    {
+      "query": "合同价格是多少",
+      "relevant_ids": [
+        "7ade97ea-94cc-432b-8a1b-f78ab4510493",
+        "fujinba_contract_section4_chunk1"
+      ],
+      "relevance_levels": {
+        "7ade97ea-94cc-432b-8a1b-f78ab4510493": 2,
+        "fujinba_contract_section4_chunk1": 2
+      },
+      "description": "查询合同签约价格"
+    },
+    {
+      "query": "工期是多少天",
+      "relevant_ids": [
+        "03fe36ae-1f25-4e27-92f1-9fe0a177ce6d"
+      ],
+      "relevance_levels": {
+        "03fe36ae-1f25-4e27-92f1-9fe0a177ce6d": 2
+      },
+      "description": "查询施工工期"
+    },
+    {
+      "query": "合同条款有哪些",
+      "relevant_ids": [
+        "7ade97ea-94cc-432b-8a1b-f78ab4510493",
+        "5176558f-1905-46c4-9c62-7185a0385210",
+        "2518492b-5528-4247-b948-7a7b8cb72a73",
+        "e532ed1c-49ae-4e50-83e2-603a8de2ce69",
+        "3ae9f98b-ddc3-476b-811b-758e98d64601"
+      ],
+      "relevance_levels": {
+        "7ade97ea-94cc-432b-8a1b-f78ab4510493": 2,
+        "5176558f-1905-46c4-9c62-7185a0385210": 2,
+        "2518492b-5528-4247-b948-7a7b8cb72a73": 2,
+        "e532ed1c-49ae-4e50-83e2-603a8de2ce69": 2,
+        "3ae9f98b-ddc3-476b-811b-758e98d64601": 2
+      },
+      "description": "查询合同条款"
+    },
+    {
+      "query": "投标文件要求",
+      "relevant_ids": [
+        "5d317d0d-7a74-4447-8708-0c42e5f7b40b"
+      ],
+      "relevance_levels": {
+        "5d317d0d-7a74-4447-8708-0c42e5f7b40b": 2
+      },
+      "description": "查询投标要求"
+    }
+  ]
+}

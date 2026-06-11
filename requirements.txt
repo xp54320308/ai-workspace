@@ -1,0 +1,32 @@
+# RAG 项目依赖
+# 核心框架
+langchain>=0.3.0
+langchain-core>=0.3.0
+langchain-community>=0.3.0
+langchain-ollama>=0.2.0
+langchain-chroma>=0.2.0
+langchain-text-splitters>=0.3.0
+
+# 文档加载
+pypdf>=4.0.0
+python-docx>=1.0.0
+
+# 向量数据库
+chromadb>=0.5.0
+
+# Ollama 客户端
+ollama>=0.4.0
+
+# 配置管理
+pyyaml>=6.0
+
+# === Tier 1：多格式增强（可选） ===
+# openpyxl>=3.1.0          # .xlsx 支持
+# watchdog>=3.0.0          # 自动文档监听
+
+# === Tier 2：高级功能（可选） ===
+# paddlepaddle>=2.6.0      # PaddleOCR CPU 版
+# paddleocr>=2.8.0         # 扫描 PDF OCR
+
+# === 测试 ===
+pytest>=8.0.0
