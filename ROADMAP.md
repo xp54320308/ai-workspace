@@ -4,6 +4,9 @@ This roadmap describes the near-term direction for AI Workspace. It is intention
 
 ## Now
 
+The 2026-10-22 maintenance change adds offline tools, synthetic examples,
+core regression tests, and a CI definition. See [the changelog](CHANGELOG.md).
+
 - Stabilize setup instructions for Windows, WSL2, Linux, and macOS.
 - Add repository hygiene: license, contribution guide, security policy, and issue templates.
 - Keep local data, vector stores, and generated skill memory out of Git by default.
@@ -11,9 +14,9 @@ This roadmap describes the near-term direction for AI Workspace. It is intention
 
 ## Next
 
-- Add automated tests for configuration loading, document ingestion, and skill memory.
-- Add GitHub Actions for linting and syntax checks.
-- Add a small synthetic sample dataset for demos.
+- Extend configuration, document-ingestion, and skill-memory regression coverage.
+- Validate the new Windows/Linux GitHub Actions matrix and add RAG backend checks separately.
+- Expand the included synthetic examples into reproducible RAG integration evaluations.
 - Improve error messages when Ollama is missing or models are not installed.
 - Move hard-coded paths in watcher utilities fully behind config.
 

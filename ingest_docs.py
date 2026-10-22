@@ -1,28 +1,22 @@
 import os
-from langchain_community.document_loaders import (
-    DirectoryLoader,
-    TextLoader,
-    PyPDFLoader,
-)
-from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 # ---------------------------------------------------------------------------
 # 文件格式加载器映射
 # ---------------------------------------------------------------------------
-LOADER_MAPPING = {
-    ".txt":  {"loader_cls": TextLoader,   "loader_kwargs": {"encoding": "utf-8"}},
-    ".pdf":  {"loader_cls": PyPDFLoader,  "loader_kwargs": {}},
-    # Markdown 用 TextLoader 读取纯文本，避免 unstructured 的额外依赖
-    ".md":   {"loader_cls": TextLoader,   "loader_kwargs": {"encoding": "utf-8"}},
-    # Word (.docx) 通过 python-docx 自定义加载
-}
+def _text_loader_mapping():
+    # Other formats can be used without importing the PDF/directory backend.
+    from langchain_community.document_loaders import TextLoader, PyPDFLoader
+    return {
+        ".txt": {"loader_cls": TextLoader, "loader_kwargs": {"encoding": "utf-8"}},
+        ".pdf": {"loader_cls": PyPDFLoader, "loader_kwargs": {}},
+        ".md": {"loader_cls": TextLoader, "loader_kwargs": {"encoding": "utf-8"}},
+    }
 
 
 def load_docx(file_path: str):
-    """使用 python-docx 加载 .docx 文件"""
-    from docx import Document
-    doc = Document(file_path)
-    text = "\n".join([para.text for para in doc.paragraphs if para.text.strip()])
+    """按正文顺序提取段落及表格，避免遗漏表格中的知识。"""
+    from workspace_tools.docx import extract_docx, render_blocks
+    text = render_blocks(extract_docx(file_path))
     from langchain_core.documents import Document as LCDocument
     return [LCDocument(page_content=text, metadata={"source": file_path})]
 
@@ -63,8 +57,10 @@ def load_documents(data_dir: str = "data"):
 
     print(f"📂 Scanning directory: {os.path.abspath(data_dir)}")
 
+    from langchain_community.document_loaders import DirectoryLoader
+
     # 1. 加载 .txt, .pdf, .md 文件 (使用 DirectoryLoader)
-    for ext, config in LOADER_MAPPING.items():
+    for ext, config in _text_loader_mapping().items():
         try:
             loader = DirectoryLoader(
                 data_dir,
@@ -115,6 +111,7 @@ def load_documents(data_dir: str = "data"):
 
 def split_documents(docs, chunk_size=800, chunk_overlap=100):
     """将文档切分为文本块"""
+    from langchain_text_splitters import RecursiveCharacterTextSplitter
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=chunk_size,
         chunk_overlap=chunk_overlap,

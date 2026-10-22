@@ -103,6 +103,19 @@ class SkillManager:
         reverse = key in {"created", "updated", "rating", "hits"}
         return sorted(self._index.get("skills", []), key=lambda item: item.get(key, ""), reverse=reverse)
 
+    def delete_skill(self, skill_id: str) -> bool:
+        """Remove an obsolete answer from the index and persist the change."""
+        remaining = [
+            skill for skill in self._index["skills"]
+            if skill.get("skill_id") != skill_id
+        ]
+        if len(remaining) == len(self._index["skills"]):
+            return False
+        self._index["skills"] = remaining
+        self._index["last_updated"] = _utc_now()
+        self._write_index()
+        return True
+
     def get_stats(self) -> Dict[str, Any]:
         """Return aggregate skill-memory statistics."""
 

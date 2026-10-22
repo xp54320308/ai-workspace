@@ -1,5 +1,7 @@
 # AI Workspace
 
+[简体中文](README.zh-CN.md) · [Offline tools](docs/offline-tools.md) · [Existing branches](docs/branches.md) · [Changelog](CHANGELOG.md)
+
 AI Workspace is a local-first knowledge management toolkit for building practical RAG systems, maintaining LLM-oriented project notes, monitoring ChromaDB vector stores, and documenting ComfyUI production workflows.
 
 The repository is early-stage, but it is structured as a reusable open-source workspace for developers who want a transparent local AI stack rather than a hosted black box.
@@ -8,6 +10,7 @@ The repository is early-stage, but it is structured as a reusable open-source wo
 
 | Area | Purpose |
 | --- | --- |
+| Offline workspace tools | Inventory project metadata, extract DOCX body text/tables, search bilingual notes with BM25, and validate local Markdown links without a model service. |
 | RAG pipeline | Load documents, split them into chunks, embed them with Ollama, and store them in ChromaDB. |
 | RAG chat | Query the local vector store with a source-aware conversational assistant. |
 | Auto ingest | Watch a document folder and rebuild the vector store when supported files change. |
@@ -47,6 +50,23 @@ The repository is early-stage, but it is structured as a reusable open-source wo
 ```
 
 ## Quick start
+
+### Try the offline tools first (no dependencies or model download)
+
+Python 3.10+ is required. These commands use only the standard library:
+
+~~~sh
+python -m workspace_tools catalog examples --depth 1
+python -m workspace_tools search examples/knowledge-base "11434"
+python -m workspace_tools check-links .
+python examples/make_sample_docx.py tmp/demo.docx
+python -m workspace_tools extract-docx tmp/demo.docx --format json
+~~~
+
+See [offline tool behavior and limits](docs/offline-tools.md) and
+[where the reusable code comes from](docs/provenance.md).
+
+### Set up the full RAG pipeline
 
 ### 1. Install dependencies
 
@@ -150,13 +170,27 @@ AI Workspace is designed for local knowledge work. It may process sensitive docu
 ## Documentation
 
 - [Getting started](docs/getting-started.md)
+- [Offline workspace tools](docs/offline-tools.md)
+- [Provenance and scope](docs/provenance.md)
+- [Existing experimental branches](docs/branches.md)
 - [Maintainer guide](docs/maintainer-guide.md)
 - [Roadmap](ROADMAP.md)
 - [Security policy](SECURITY.md)
 
 ## Project status
 
-This project is under active early development. The next priorities are test coverage, clearer examples, dependency hardening, CI, release automation, and reusable templates for local AI knowledge systems.
+This project is early-stage. The offline utilities have synthetic regression tests and a
+GitHub Actions workflow; full model/vector-store integration still requires a separate
+environment. Advanced retrieval and indexing experiments already exist in other
+[branches](docs/branches.md). Next priorities are dependency compatibility, broader RAG
+integration coverage, and release automation.
+
+Run the offline regression suite with:
+
+~~~sh
+python -m pip install -r requirements-test.txt
+python -m unittest discover -s tests -v
+~~~
 
 ## Contributing
 

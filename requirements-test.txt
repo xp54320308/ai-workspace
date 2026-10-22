@@ -1,0 +1,3 @@
+# Model-free tests, including the real LangChain DOCX adapter.
+PyYAML>=6,<7
+langchain-core>=0.3.0,<2
