@@ -6,6 +6,7 @@
 
 import os
 import yaml
+from copy import deepcopy
 from pathlib import Path
 from typing import Any, Dict
 
@@ -19,7 +20,7 @@ DEFAULT_CONFIG = {
     "models": {
         "embedding": "nomic-embed-text",
         "chat": "qwen2.5:14b",
-        "temperature": 0,
+        "temperature": 0.0,
     },
     "retrieval": {
         "k": 5,
@@ -64,7 +65,7 @@ ENV_OVERRIDES = {
 
 def _deep_merge(base: dict, override: dict) -> dict:
     """递归合并两个字典"""
-    result = base.copy()
+    result = deepcopy(base)
     for key, value in override.items():
         if key in result and isinstance(result[key], dict) and isinstance(value, dict):
             result[key] = _deep_merge(result[key], value)
@@ -82,12 +83,14 @@ def _set_dotpath(config: dict, dotpath: str, value: Any):
     # 类型转换
     current_key = keys[-1]
     existing = current.get(current_key)
-    if isinstance(existing, int):
-        value = int(value)
-    elif isinstance(existing, float):
+    if dotpath == "models.temperature":
         value = float(value)
     elif isinstance(existing, bool):
         value = value.lower() in ("true", "1", "yes")
+    elif isinstance(existing, int):
+        value = int(value)
+    elif isinstance(existing, float):
+        value = float(value)
     current[current_key] = value
 
 
@@ -102,7 +105,7 @@ def load_config(config_path: str = None) -> dict:
         合并后的配置字典
     """
     # 1. 从默认值开始
-    config = DEFAULT_CONFIG.copy()
+    config = deepcopy(DEFAULT_CONFIG)
 
     # 2. 加载 YAML 文件
     if config_path is None:
@@ -110,7 +113,11 @@ def load_config(config_path: str = None) -> dict:
 
     if os.path.exists(config_path):
         with open(config_path, "r", encoding="utf-8") as f:
-            yaml_config = yaml.safe_load(f) or {}
+            yaml_config = yaml.safe_load(f)
+        if yaml_config is None:
+            yaml_config = {}
+        if not isinstance(yaml_config, dict):
+            raise ValueError("Config YAML must contain a mapping at the top level")
         config = _deep_merge(config, yaml_config)
 
     # 3. 应用环境变量覆盖
